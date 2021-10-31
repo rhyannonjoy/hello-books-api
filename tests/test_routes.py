@@ -20,3 +20,22 @@ def test_get_one_book(client, two_saved_books):
         "title": "Ocean Book",
         "description": "watr 4evr"
     }
+
+
+def test_create_a_book(client):
+    # act
+    response = client.post("/books", json = {
+        "title" : "The Never Ending Story",
+        "description" : "The horse dies"
+    })
+    response_body = response.get_json()
+    
+    # assert
+    assert response.status_code == 201
+    assert response_body == {
+        "id" : 1,
+        "title" : "The Never Ending Story",
+        "description": "The horse dies"
+    }
+
+    

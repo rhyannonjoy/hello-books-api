@@ -19,7 +19,13 @@ def handle_books():
         db.session.add(new_book)
         db.session.commit()
 
-        return f"Book {new_book.title} created", 201
+        book = {
+            "title" : new_book.title,
+            "description" : new_book.description,
+            "id" : new_book.id
+        }
+
+        return jsonify(book), 201
     
     elif request.method == "GET":
         title_query = request.args.get("title")

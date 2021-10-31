@@ -1,9 +1,11 @@
 from app import db
+from app.models.author import Author
 from app.models.book import Book
 from flask import Blueprint, jsonify, make_response, request 
 
 
 books_bp = Blueprint("books", __name__, url_prefix="/books")
+authors_bp = Blueprint("authors", __name__, url_prefix="/authors")
 
 @books_bp.route("", methods=["POST", "GET"])
 def handle_books():
@@ -69,3 +71,40 @@ def handle_book(book_id):
         db.session.delete(book)
         db.session.commit()
         return make_response(f"Book #{book.id} successfully deleted.", 200)
+
+
+@authors_bp.route("", methods=["POST", "GET"])
+def handle_authors():
+    if request.method == "POST":
+        request_body = request.get_json()
+        if "title" not in request_body or "description" not in request_body:
+            return make_response("Invalid Request", 400)
+
+        new_author = Author(
+            name=request_body["name"],
+            )
+        db.session.add(new_author)
+        db.session.commit()
+
+        author = {
+            "name" : new_author.name,
+            "id" : new_author.id
+        }
+
+        return jsonify(author), 201
+    
+    elif request.method == "GET":
+        name_query = request.args.get("name")
+        if name_query:
+            authors = Author.query.filter_by(name=name_query)
+        else:
+            authors = Author.query.all()
+        
+        authors_response = []
+        for author in authors:
+            authors_response.append({
+                "id" : author.id,
+                "name" : author.name,
+            })
+        
+        return jsonify(authors_response), 200
